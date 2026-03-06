@@ -1,0 +1,118 @@
+{
+    "nav": {
+        "home": "Home",
+        "challenges": "Challenges",
+        "classes": "Classes",
+        "rank": "Rank",
+        "profile": "Profile",
+        "login": "Log In",
+        "logout": "Log out",
+        "toggleTheme": "Toggle theme"
+    },
+    "home": {
+        "hero": {
+            "title": "Master Coding the Modern Way",
+            "subtitle": "Learn Go & SQL through story-based challenges, interactive lessons, and hands-on quizzes. Level up your skills intelligently.",
+            "startFree": "Start Learning For Free",
+            "continueLearning": "Continue Learning"
+        },
+        "progress": {
+            "title": "Your Progress",
+            "xpTotal": "XP Total",
+            "level": "Level",
+            "streak": "Streak",
+            "days": "Days",
+            "levelTo": "Level {from} to {to}"
+        },
+        "actions": {
+            "challengesTitle": "Coding Challenges",
+            "challengesDesc": "Solve story-based coding problems in Go & SQL. Test your skills with real-world scenarios.",
+            "coursesTitle": "Interactive Courses",
+            "coursesDesc": "Browse structured Go & SQL courses with theory, lessons, and quizzes.",
+            "leaderboardTitle": "Leaderboard",
+            "leaderboardDesc": "See where you stand. Compete with others and earn the top spot this week."
+        },
+        "features": {
+            "challenges": "Story Challenges",
+            "challengesDesc": "Solve real problems",
+            "lessons": "Curated Lessons",
+            "lessonsDesc": "Theory + Guided Learning",
+            "execution": "Live Execution",
+            "executionDesc": "Run real code in-browser",
+            "quizzes": "Smart Quizzes",
+            "quizzesDesc": "Test your knowledge"
+        }
+    },
+    "challenge": {
+        "title": "Coding Challenges",
+        "filterLanguage": "Language",
+        "filterDifficulty": "Difficulty",
+        "all": "All",
+        "runCode": "Run Code",
+        "submit": "Submit",
+        "running": "Running...",
+        "allTestsPassed": "All tests passed!",
+        "testCase": "Test Case",
+        "input": "Input:",
+        "expected": "Expected:",
+        "actual": "Actual:",
+        "hint": "Hint",
+        "task": "Task",
+        "story": "Story",
+        "schema": "Schema",
+        "heroTitle": "Conquer Difficult Topics",
+        "allLanguage": "All Languages",
+        "allDifficulty": "All Difficulties",
+        "tableChallenge": "Challenge",
+        "tableCategory": "Category",
+        "tableLevel": "Level",
+        "tableStatus": "Status",
+        "tableXp": "XP Reward",
+        "tableAction": "Action",
+        "startNow": "Start Now",
+        "previousPage": "Previous",
+        "page": "Page",
+        "nextPage": "Next"
+    },
+    "course": {
+        "title": "Courses",
+        "lessons": "Lessons",
+        "startLesson": "Start Lesson",
+        "continueLesson": "Continue",
+        "completed": "Completed",
+        "quiz": "Quiz",
+        "submitQuiz": "Submit Answers",
+        "markComplete": "Mark as Complete",
+        "score": "Score",
+        "allLanguage": "All Languages",
+        "lessonLocked": "Lesson Locked",
+        "lessonNotFound": "Lesson Not Found",
+        "examLoadFailed": "Failed to Load Exam",
+        "reviewAnswers": "Review Answers"
+    },
+    "profile": {
+        "title": "Profile",
+        "xpHistory": "XP History",
+        "challengeStats": "Challenge Stats",
+        "settings": "Settings",
+        "language": "Language",
+        "totalSolved": "Total Solved",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard",
+        "certificateTitle": "Certificate of Completion",
+        "certificateGivenTo": "Proudly presented to",
+        "certificateAchievement": "Achievement",
+        "certificateDate": "Graduation Date"
+    },
+    "leaderboard": {
+        "title": "Leaderboard",
+        "weekly": "Weekly",
+        "allTime": "All Time"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "xp": "XP"
+    }
+}

@@ -1,0 +1,118 @@
+{
+    "nav": {
+        "home": "Beranda",
+        "challenges": "Tantangan",
+        "classes": "Kelas",
+        "rank": "Peringkat",
+        "profile": "Profil",
+        "login": "Masuk",
+        "logout": "Keluar",
+        "toggleTheme": "Ganti tema"
+    },
+    "home": {
+        "hero": {
+            "title": "Kuasai Coding dengan Cara Modern",
+            "subtitle": "Belajar Go & SQL lewat tantangan cerita, pelajaran interaktif, dan kuis langsung. Tingkatkan skill kamu dengan cerdas.",
+            "startFree": "Mulai Belajar Gratis",
+            "continueLearning": "Lanjutkan Belajar"
+        },
+        "progress": {
+            "title": "Progres Kamu",
+            "xpTotal": "Total XP",
+            "level": "Level",
+            "streak": "Streak",
+            "days": "Hari",
+            "levelTo": "Level {from} ke {to}"
+        },
+        "actions": {
+            "challengesTitle": "Tantangan Coding",
+            "challengesDesc": "Selesaikan soal coding berbasis cerita di Go & SQL. Uji skill kamu dengan skenario nyata.",
+            "coursesTitle": "Kursus Interaktif",
+            "coursesDesc": "Jelajahi kursus Go & SQL terstruktur dengan teori, pelajaran, dan kuis.",
+            "leaderboardTitle": "Papan Peringkat",
+            "leaderboardDesc": "Lihat peringkatmu. Bersainglah dengan yang lain dan raih posisi teratas minggu ini."
+        },
+        "features": {
+            "challenges": "Tantangan Cerita",
+            "challengesDesc": "Pecahkan masalah nyata",
+            "lessons": "Pelajaran Terkurasi",
+            "lessonsDesc": "Teori + Belajar Terbimbing",
+            "execution": "Eksekusi Langsung",
+            "executionDesc": "Jalankan kode nyata di browser",
+            "quizzes": "Kuis Cerdas",
+            "quizzesDesc": "Uji pengetahuanmu"
+        }
+    },
+    "challenge": {
+        "title": "Tantangan Coding",
+        "filterLanguage": "Bahasa",
+        "filterDifficulty": "Tingkat Kesulitan",
+        "all": "Semua",
+        "runCode": "Jalankan",
+        "submit": "Kirim",
+        "running": "Menjalankan...",
+        "allTestsPassed": "Semua tes berhasil!",
+        "testCase": "Kasus Tes",
+        "input": "Input:",
+        "expected": "Diharapkan:",
+        "actual": "Aktual:",
+        "hint": "Petunjuk",
+        "task": "Tugas",
+        "story": "Cerita",
+        "schema": "Skema",
+        "heroTitle": "Taklukkan Topik Sulit",
+        "allLanguage": "Semua Bahasa",
+        "allDifficulty": "Semua Kesulitan",
+        "tableChallenge": "Tantangan",
+        "tableCategory": "Kategori",
+        "tableLevel": "Tingkat",
+        "tableStatus": "Status",
+        "tableXp": "Hadiah XP",
+        "tableAction": "Aksi",
+        "startNow": "Mulai Sekarang",
+        "previousPage": "Sebelumnya",
+        "page": "Halaman",
+        "nextPage": "Selanjutnya"
+    },
+    "course": {
+        "title": "Kelas",
+        "lessons": "Pelajaran",
+        "startLesson": "Mulai Pelajaran",
+        "continueLesson": "Lanjutkan",
+        "completed": "Selesai",
+        "quiz": "Kuis",
+        "submitQuiz": "Kirim Jawaban",
+        "markComplete": "Tandai Selesai",
+        "score": "Skor",
+        "allLanguage": "Semua Bahasa",
+        "lessonLocked": "Pelajaran Terkunci",
+        "lessonNotFound": "Pelajaran Tidak Ditemukan",
+        "examLoadFailed": "Gagal Memuat Ujian",
+        "reviewAnswers": "Review Jawaban"
+    },
+    "profile": {
+        "title": "Profil",
+        "xpHistory": "Riwayat XP",
+        "challengeStats": "Statistik Tantangan",
+        "settings": "Pengaturan",
+        "language": "Bahasa",
+        "totalSolved": "Total Solved",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard",
+        "certificateTitle": "Sertifikat Kelulusan",
+        "certificateGivenTo": "Diberikan dengan bangga kepada",
+        "certificateAchievement": "Pencapaian",
+        "certificateDate": "Tanggal Lulus"
+    },
+    "leaderboard": {
+        "title": "Papan Peringkat",
+        "weekly": "Mingguan",
+        "allTime": "Sepanjang Waktu"
+    },
+    "common": {
+        "loading": "Memuat...",
+        "error": "Kesalahan",
+        "xp": "XP"
+    }
+}

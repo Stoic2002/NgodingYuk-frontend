@@ -10,6 +10,61 @@ import { DifficultyBadge, LanguageBadge, Skeleton } from "@/app/components/UI";
 import Editor from "@monaco-editor/react";
 import MarkdownRenderer from "@/app/components/MarkdownRenderer";
 
+const JsonTable = ({ data, isResult = false, isPassed = false }: { data: any, isResult?: boolean, isPassed?: boolean }) => {
+    try {
+        let arr = typeof data === 'string' ? JSON.parse(data) : data;
+        if (!Array.isArray(arr) || arr.length === 0) {
+            return (
+                <code className={`block p-3 font-mono text-[12px] whitespace-pre-wrap break-all ${isResult ? (isPassed ? "bg-[#f4f3ee] border border-green-500 text-green-600" : "bg-[#f4f3ee] border border-red-500 text-red-500") : "text-slate-900"}`}>
+                    {typeof data === 'string' ? data : JSON.stringify(data, null, 2)}
+                </code>
+            );
+        }
+
+        const cols = Object.keys(arr[0] || {});
+        if (cols.length === 0) {
+            return (
+                <code className={`block p-3 font-mono text-[12px] whitespace-pre-wrap break-all ${isResult ? (isPassed ? "bg-[#f4f3ee] border border-green-500 text-green-600" : "bg-[#f4f3ee] border border-red-500 text-red-500") : "text-slate-900"}`}>
+                    {typeof data === 'string' ? data : JSON.stringify(data, null, 2)}
+                </code>
+            );
+        }
+
+        return (
+            <div className={`overflow-x-auto border ${isResult ? (isPassed ? "border-green-500" : "border-red-500") : "border-[#b1ada1]"}`}>
+                <table className="w-full text-xs text-left border-collapse bg-white">
+                    <thead>
+                        <tr className={`border-b ${isResult ? (isPassed ? "border-green-500" : "border-red-500") : "border-[#b1ada1]"}`}>
+                            {cols.map((c) => (
+                                <th key={c} className={`px-4 py-2.5 font-bold uppercase tracking-wide border-b ${isResult ? (isPassed ? "border-green-500 text-green-600" : "border-red-500 text-red-500") : "border-[#b1ada1] text-slate-900"}`}>
+                                    {c}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {arr.map((row, i) => (
+                            <tr key={i} className={`border-b last:border-0 hover:bg-[#f4f3ee] ${isResult ? (isPassed ? "border-green-200" : "border-red-200") : "border-slate-200"}`}>
+                                {cols.map((c) => (
+                                    <td key={c} className={`px-4 py-2 font-mono text-[11px] whitespace-nowrap ${isResult ? (isPassed ? "text-green-700" : "text-red-600") : "text-slate-900"}`}>
+                                        {String(row[c] ?? "")}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    } catch {
+        return (
+            <code className={`block p-3 font-mono text-[12px] whitespace-pre-wrap break-all ${isResult ? (isPassed ? "bg-[#f4f3ee] border border-green-500 text-green-600" : "bg-[#f4f3ee] border border-red-500 text-red-500") : "text-slate-900"}`}>
+                {typeof data === 'string' ? data : JSON.stringify(data, null, 2)}
+            </code>
+        );
+    }
+};
+
 export default function ChallengeDetailPage() {
     const params = useParams();
     const slug = params.slug as string;
@@ -35,8 +90,23 @@ export default function ChallengeDetailPage() {
         setLoading(true);
         try {
             const res = await challengeAPI.getBySlug(slug);
-            setChallenge(res.data);
-            setCode(res.data.starter_code || "");
+            const rawData = res.data;
+
+            // Fix backend stringified JSON bug
+            if (typeof rawData.schema_info === 'string') {
+                try {
+                    rawData.schema_info = JSON.parse(rawData.schema_info);
+                } catch (e) { }
+            }
+            if (typeof rawData.expected_output === 'string') {
+                try {
+                    const parsed = JSON.parse(rawData.expected_output);
+                    if (typeof parsed === 'object') rawData.expected_output = parsed;
+                } catch (e) { }
+            }
+
+            setChallenge(rawData);
+            setCode(rawData.starter_code || "");
         } catch {
             setChallenge(null);
         }
@@ -190,7 +260,10 @@ export default function ChallengeDetailPage() {
                                 </>
                             ) : activeTab === "schema" ? (
                                 <div className="space-y-6">
-                                    {challenge.schema_info?.tables.map((table) => (
+                                    {!challenge.schema_info?.tables || !Array.isArray(challenge.schema_info.tables) ? (
+                                        <div className="text-sm text-[#b1ada1] italic p-4">Schema informasi tidak tersedia untuk challenge ini.</div>
+                                    ) : challenge.schema_info.tables.map((table) => (
+
                                         <div key={table.name} className="bg-white border border-[#b1ada1]">
                                             <div className="bg-white border-b border-[#b1ada1] px-4 py-3">
                                                 <h3 className="font-bold text-sm uppercase tracking-widest text-slate-900 flex items-center gap-2">
@@ -235,11 +308,15 @@ export default function ChallengeDetailPage() {
                                             </h3>
                                         </div>
                                         <div className="p-4 bg-[#f4f3ee]">
-                                            <pre className="text-sm font-mono text-slate-900 whitespace-pre-wrap break-all">
-                                                {typeof challenge.expected_output === 'string'
-                                                    ? challenge.expected_output
-                                                    : JSON.stringify(challenge.expected_output, null, 2)}
-                                            </pre>
+                                            {challenge.language === "sql" ? (
+                                                <JsonTable data={challenge.expected_output} />
+                                            ) : (
+                                                <pre className="text-xs text-slate-900 font-mono whitespace-pre-wrap break-all">
+                                                    {typeof challenge.expected_output === 'string'
+                                                        ? challenge.expected_output
+                                                        : JSON.stringify(challenge.expected_output, null, 2)}
+                                                </pre>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -346,14 +423,26 @@ export default function ChallengeDetailPage() {
                                                     </div>
                                                 )}
                                                 {result.expected && (
-                                                    <div className="text-xs text-slate-900 flex flex-col gap-1.5">
+                                                    <div className="text-xs text-slate-900 flex flex-col gap-1.5 overflow-x-auto">
                                                         <span className="font-bold uppercase tracking-widest text-[10px] text-[#b1ada1]">{t("challenge.expected")}</span>
-                                                        <code className="block bg-[#f4f3ee] border border-green-500 text-green-600 p-3 font-mono text-[12px] whitespace-pre-wrap break-all">{result.expected}</code>
+                                                        {challenge.language === "sql" ? (
+                                                            <JsonTable data={result.expected} isResult={true} isPassed={true} />
+                                                        ) : (
+                                                            <code className={`block border p-3 font-mono text-[12px] whitespace-pre-wrap break-all ${result.passed ? "bg-green-50 border-green-200 text-green-900" : "bg-[#f4f3ee] border-[#b1ada1] text-slate-900"}`}>
+                                                                {typeof result.expected === 'string' ? result.expected : JSON.stringify(result.expected, null, 2)}
+                                                            </code>
+                                                        )}
                                                     </div>
                                                 )}
-                                                <div className="text-xs text-slate-900 flex flex-col gap-1.5">
+                                                <div className="text-xs text-slate-900 flex flex-col gap-1.5 overflow-x-auto">
                                                     <span className="font-bold uppercase tracking-widest text-[10px] text-[#b1ada1]">{t("challenge.actual")}</span>
-                                                    <code className={`block p-3 font-mono text-[12px] whitespace-pre-wrap break-all border bg-[#f4f3ee] ${result.passed ? "border-green-500 text-green-600" : "border-red-500 text-red-500"}`}>{result.actual}</code>
+                                                    {challenge.language === "sql" ? (
+                                                        <JsonTable data={result.actual} isResult={true} isPassed={result.passed} />
+                                                    ) : (
+                                                        <code className={`block border p-3 font-mono text-[12px] whitespace-pre-wrap break-all ${result.passed ? "bg-green-50 border-green-200 text-green-900" : "bg-red-50 border-red-200 text-red-900"}`}>
+                                                            {typeof result.actual === 'string' ? result.actual : JSON.stringify(result.actual, null, 2)}
+                                                        </code>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

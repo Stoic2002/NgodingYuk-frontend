@@ -37,7 +37,7 @@ export function middleware(request: NextRequest) {
     if (isAuthRoute && accessToken) {
         // Redirect authenticated users away from login/register
         const url = request.nextUrl.clone();
-        url.pathname = '/dashboard'; // Or wherever your default authenticated route is
+        url.pathname = '/';
         return NextResponse.redirect(url);
     }
 

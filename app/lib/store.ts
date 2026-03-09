@@ -19,6 +19,7 @@ interface AppState {
     theme: "dark" | "light";
     locale: "en" | "id";
     isSidebarCollapsed: boolean;
+    _hasInitialized: boolean;
 
     // Actions
     setUser: (user: User | null) => void;
@@ -113,7 +114,12 @@ export const useStore = create<AppState>((set, get) => ({
         }
     },
 
+    _hasInitialized: false,
+
     initAuth: async () => {
+        if (get()._hasInitialized) return;
+        set({ _hasInitialized: true });
+
         try {
             // The browser will automatically send cookies with this request.
             // If the user isn't authenticated, the response will be 401 

@@ -3,6 +3,8 @@ import AppShell from "@/app/components/AppShell";
 import { ChallengeListItem } from "@/app/lib/types";
 import { ChallengeListClient } from "./ChallengeListClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function TantanganPage({
     searchParams,
 }: {

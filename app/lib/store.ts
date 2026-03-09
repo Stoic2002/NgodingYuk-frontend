@@ -28,7 +28,7 @@ interface AppState {
         email: string,
         password: string
     ) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
     refreshProfile: () => Promise<void>;
     toggleTheme: () => void;
     setLocale: (locale: "en" | "id") => void;
@@ -61,23 +61,24 @@ export const useStore = create<AppState>((set, get) => ({
 
     login: async (email, password) => {
         const res = await authAPI.login({ email, password });
-        const { access_token, refresh_token, user } = res.data;
-        localStorage.setItem("access_token", access_token);
-        localStorage.setItem("refresh_token", refresh_token);
+        // The backend automatically sets the access_token and refresh_token in HttpOnly cookies
+        const { user } = res.data;
         set({ user, isLoggedIn: true });
     },
 
     register: async (username, email, password) => {
         const res = await authAPI.register({ username, email, password });
-        const { access_token, refresh_token, user } = res.data;
-        localStorage.setItem("access_token", access_token);
-        localStorage.setItem("refresh_token", refresh_token);
+        // The backend automatically sets the access_token and refresh_token in HttpOnly cookies
+        const { user } = res.data;
         set({ user, isLoggedIn: true });
     },
 
-    logout: () => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+    logout: async () => {
+        try {
+            await authAPI.logout();
+        } catch {
+            // Ignore if backend fails
+        }
         set({ user: null, isLoggedIn: false });
     },
 
@@ -91,7 +92,7 @@ export const useStore = create<AppState>((set, get) => ({
                 get().showLevelUp();
             }
         } catch {
-            // Token might be invalid
+            // Token might be invalid or expired
         }
     },
 
@@ -113,15 +114,13 @@ export const useStore = create<AppState>((set, get) => ({
     },
 
     initAuth: async () => {
-        const token = localStorage.getItem("access_token");
-        if (token) {
-            try {
-                const res = await userAPI.getMe();
-                set({ user: res.data, isLoggedIn: true, isLoading: false });
-            } catch {
-                set({ isLoading: false });
-            }
-        } else {
+        try {
+            // The browser will automatically send cookies with this request.
+            // If the user isn't authenticated, the response will be 401 
+            // (or handled by the interceptor which will try to refresh).
+            const res = await userAPI.getMe();
+            set({ user: res.data, isLoggedIn: true, isLoading: false });
+        } catch {
             set({ isLoading: false });
         }
     },

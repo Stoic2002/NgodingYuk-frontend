@@ -5,18 +5,15 @@ const API_BASE_URL =
 
 const api = axios.create({
     baseURL: API_BASE_URL,
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-// Attach JWT token + locale to every request
+// Attach locale to every request
 api.interceptors.request.use((config) => {
     if (typeof window !== "undefined") {
-        const token = localStorage.getItem("access_token");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
         // Inject locale from localStorage
         const locale = localStorage.getItem("locale") || "id";
         config.params = { ...config.params, locale };
@@ -24,25 +21,19 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Handle 401 responses — auto refresh
+// Handle 401 responses — auto refresh via cookies
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response?.status === 401 && typeof window !== "undefined") {
-            const refreshToken = localStorage.getItem("refresh_token");
-            if (refreshToken) {
-                try {
-                    const res = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-                        refresh_token: refreshToken,
-                    });
-                    const { access_token, refresh_token } = res.data;
-                    localStorage.setItem("access_token", access_token);
-                    localStorage.setItem("refresh_token", refresh_token);
-                    error.config.headers.Authorization = `Bearer ${access_token}`;
-                    return axios(error.config);
-                } catch {
-                    localStorage.removeItem("access_token");
-                    localStorage.removeItem("refresh_token");
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && typeof window !== "undefined" && !originalRequest._retry) {
+            originalRequest._retry = true;
+            try {
+                // Backend will read refresh_token cookie and set new access_token cookie
+                await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
+                return api(originalRequest);
+            } catch {
+                if (window.location.pathname !== "/login" && window.location.pathname !== "/register") {
                     window.location.href = "/login";
                 }
             }
@@ -57,8 +48,10 @@ export const authAPI = {
         api.post("/auth/register", data),
     login: (data: { email: string; password: string }) =>
         api.post("/auth/login", data),
-    refresh: (refreshToken: string) =>
-        api.post("/auth/refresh", { refresh_token: refreshToken }),
+    logout: () =>
+        api.post("/auth/logout"),
+    refresh: () =>
+        api.post("/auth/refresh"),
 };
 
 // ============ Challenges (Tantangan) ============

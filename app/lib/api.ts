@@ -22,22 +22,49 @@ api.interceptors.request.use((config) => {
 });
 
 // Handle 401 responses — auto refresh via cookies
+let isRefreshing = false;
+
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        if (error.response?.status === 401 && typeof window !== "undefined" && !originalRequest._retry) {
+
+        // If the error is 401 AND we haven't already retried AND it's not the refresh endpoint itself
+        if (
+            error.response?.status === 401 &&
+            typeof window !== "undefined" &&
+            !originalRequest._retry &&
+            originalRequest.url !== "/auth/refresh"
+        ) {
+            if (isRefreshing) {
+                // If already refreshing, just reject and let the UI handle it (to prevent mass concurrent refresh calls)
+                return Promise.reject(error);
+            }
+
             originalRequest._retry = true;
+            isRefreshing = true;
+
             try {
                 // Backend will read refresh_token cookie and set new access_token cookie
                 await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
+                isRefreshing = false;
                 return api(originalRequest);
-            } catch {
+            } catch (refreshError) {
+                isRefreshing = false;
                 if (window.location.pathname !== "/login" && window.location.pathname !== "/register") {
                     window.location.href = "/login";
                 }
+                return Promise.reject(refreshError);
             }
         }
+
+        // If it's a 401 on the refresh endpoint itself, just reject
+        if (error.response?.status === 401 && originalRequest.url === "/auth/refresh") {
+            if (typeof window !== "undefined" && window.location.pathname !== "/login" && window.location.pathname !== "/register") {
+                window.location.href = "/login";
+            }
+        }
+
         return Promise.reject(error);
     }
 );

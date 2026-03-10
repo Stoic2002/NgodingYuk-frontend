@@ -83,7 +83,7 @@ export const authAPI = {
 
 // ============ Challenges (Tantangan) ============
 export const challengeAPI = {
-    list: (params?: { language?: string; difficulty?: string; limit?: number; offset?: number }) =>
+    list: (params?: { language?: string; difficulty?: string; search?: string; limit?: number; offset?: number }) =>
         api.get("/challenges", { params }),
     getBySlug: (slug: string) =>
         api.get(`/challenges/${slug}`),
@@ -97,7 +97,7 @@ export const challengeAPI = {
 
 // ============ Courses (Kelas) ============
 export const courseAPI = {
-    list: (params?: { language?: string; level?: string }) =>
+    list: (params?: { language?: string; level?: string; search?: string; limit?: number; offset?: number }) =>
         api.get("/courses", { params }),
     getBySlug: (slug: string) =>
         api.get(`/courses/${slug}`),
@@ -130,6 +130,7 @@ export const userAPI = {
         api.get("/users/me/xp-history", { params }),
     getChallengeStats: () => api.get("/users/me/challenge-stats"),
     getCertificates: () => api.get("/users/me/certificates"),
+    getQuizHistory: () => api.get("/users/me/quiz-history"),
     updateMe: (data: { username?: string; locale?: string }) =>
         api.patch("/users/me", data),
 };

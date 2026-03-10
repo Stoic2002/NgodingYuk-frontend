@@ -33,9 +33,9 @@ export default function ExamPage() {
         setLoading(true);
         try {
             const res = await courseAPI.getExam(slug);
-            setExam(res.data);
-            setAnswers(new Array(res.data.total_questions).fill(-1));
-            setTimeLeft(res.data.time_limit_sec);
+            setExam(res.data.data);
+            setAnswers(new Array(res.data.data.total_questions).fill(-1));
+            setTimeLeft(res.data.data.time_limit_sec);
         } catch (err: unknown) {
             const axiosErr = err as { response?: { data?: { error?: string } } };
             setError(axiosErr?.response?.data?.error || "Gagal memuat ujian");
@@ -73,9 +73,9 @@ export default function ExamPage() {
         if (timerRef.current) clearInterval(timerRef.current);
         try {
             const res = await courseAPI.submitExam(slug, answers);
-            setResult(res.data);
-            if (res.data.xp_gained > 0) {
-                showXPGain(res.data.xp_gained);
+            setResult(res.data.data);
+            if (res.data.data.xp_gained > 0) {
+                showXPGain(res.data.data.xp_gained);
                 refreshProfile();
             }
         } catch { }

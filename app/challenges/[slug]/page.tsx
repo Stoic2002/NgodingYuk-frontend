@@ -90,7 +90,7 @@ export default function ChallengeDetailPage() {
         setLoading(true);
         try {
             const res = await challengeAPI.getBySlug(slug);
-            const rawData = res.data;
+            const rawData = res.data.data;
 
             // Fix backend stringified JSON bug
             if (typeof rawData.schema_info === 'string') {
@@ -119,8 +119,8 @@ export default function ChallengeDetailPage() {
         setResults([]);
         try {
             const res = await challengeAPI.run(slug, code);
-            setResults(res.data.results || []);
-            setAllPassed(res.data.all_passed);
+            setResults(res.data.data.results || []);
+            setAllPassed(res.data.data.all_passed);
         } catch {
             setResults([{ passed: false, actual: "Execution error", error: "Failed to run code" }]);
         }
@@ -133,11 +133,11 @@ export default function ChallengeDetailPage() {
         setResults([]);
         try {
             const res = await challengeAPI.submit(slug, code);
-            setResults(res.data.results || []);
-            setAllPassed(res.data.all_passed);
-            if (res.data.xp_gained > 0) {
-                setXpGained(res.data.xp_gained);
-                showXPGain(res.data.xp_gained);
+            setResults(res.data.data.results || []);
+            setAllPassed(res.data.data.all_passed);
+            if (res.data.data.xp_gained > 0) {
+                setXpGained(res.data.data.xp_gained);
+                showXPGain(res.data.data.xp_gained);
                 refreshProfile();
             }
         } catch {

@@ -7,12 +7,15 @@ import { courseAPI } from "@/app/lib/api";
 import { CourseListItem } from "@/app/lib/types";
 import { CourseCard } from "@/app/components/UI/CourseCard";
 import { CourseFilter } from "@/app/components/UI/CourseFilter";
+import { CoursePagination } from "@/app/components/UI/CoursePagination";
+import { Skeleton } from "@/app/components/UI";
 
 export const CourseListClient = () => {
     const { t } = useTranslation();
     const searchParams = useSearchParams();
 
     const [courses, setCourses] = useState<CourseListItem[]>([]);
+    const [totalPages, setTotalPages] = useState<number>(1);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
@@ -21,10 +24,21 @@ export const CourseListClient = () => {
             try {
                 const language = searchParams.get("language") || undefined;
                 const level = searchParams.get("level") || undefined;
+                const search = searchParams.get("search") || undefined;
+                const pageParam = searchParams.get("page") || "1";
+                const limit = 10;
+                const page = parseInt(pageParam, 10) || 1;
+                const offset = (page - 1) * limit;
 
-                const res = await courseAPI.list({ language, level });
+                const res = await courseAPI.list({ language, level, search, limit, offset });
                 if (res.status === 200) {
-                    setCourses(res.data.data || []);
+                    const data = res.data;
+                    setCourses(data.data || []);
+                    if (data.meta && data.meta.total_pages) {
+                        setTotalPages(data.meta.total_pages);
+                    } else {
+                        setTotalPages((data.data || []).length === limit ? page + 1 : page);
+                    }
                 }
             } catch (e) {
                 console.error("Failed to fetch courses:", e);
@@ -50,15 +64,25 @@ export const CourseListClient = () => {
             </div>
 
             {/* Course Cards */}
-            {courses.length === 0 ? (
+            {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <Skeleton height="300px" />
+                    <Skeleton height="300px" />
+                    <Skeleton height="300px" />
+                    <Skeleton height="300px" />
+                </div>
+            ) : courses.length === 0 ? (
                 <div className="bg-white border border-[#b1ada1] text-center py-16">
                     <p className="text-[#b1ada1] text-sm font-bold uppercase tracking-widest">No courses found.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {courses.map((course) => (
-                        <CourseCard key={course.id} course={course} />
-                    ))}
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {courses.map((course) => (
+                            <CourseCard key={course.id} course={course} />
+                        ))}
+                    </div>
+                    <CoursePagination totalPages={totalPages} />
                 </div>
             )}
         </div>

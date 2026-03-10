@@ -63,14 +63,14 @@ export const useStore = create<AppState>((set, get) => ({
     login: async (email, password) => {
         const res = await authAPI.login({ email, password });
         // The backend automatically sets the access_token and refresh_token in HttpOnly cookies
-        const { user } = res.data;
+        const { user } = res.data.data;
         set({ user, isLoggedIn: true });
     },
 
     register: async (username, email, password) => {
         const res = await authAPI.register({ username, email, password });
         // The backend automatically sets the access_token and refresh_token in HttpOnly cookies
-        const { user } = res.data;
+        const { user } = res.data.data;
         set({ user, isLoggedIn: true });
     },
 
@@ -87,7 +87,7 @@ export const useStore = create<AppState>((set, get) => ({
         try {
             const res = await userAPI.getMe();
             const prevLevel = get().user?.level || 0;
-            const newUser = res.data;
+            const newUser = res.data.data;
             set({ user: newUser });
             if (newUser.level > prevLevel && prevLevel > 0) {
                 get().showLevelUp();
@@ -125,7 +125,7 @@ export const useStore = create<AppState>((set, get) => ({
             // If the user isn't authenticated, the response will be 401 
             // (or handled by the interceptor which will try to refresh).
             const res = await userAPI.getMe();
-            set({ user: res.data, isLoggedIn: true, isLoading: false });
+            set({ user: res.data.data, isLoggedIn: true, isLoading: false });
         } catch {
             set({ isLoading: false });
         }

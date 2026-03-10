@@ -7,6 +7,7 @@ import { challengeAPI } from "@/app/lib/api";
 import { ChallengeListItem } from "@/app/lib/types";
 import { ChallengeFilter } from "@/app/components/UI/ChallengeFilter";
 import { ChallengePagination } from "@/app/components/UI/ChallengePagination";
+import { Skeleton } from "@/app/components/UI";
 
 export const ChallengeListClient = () => {
     const { t } = useTranslation();
@@ -23,12 +24,13 @@ export const ChallengeListClient = () => {
             try {
                 const language = searchParams.get("language") || "";
                 const difficulty = searchParams.get("difficulty") || "";
+                const search = searchParams.get("search") || "";
                 const pageParam = searchParams.get("page") || "1";
                 const limit = 10;
                 const page = parseInt(pageParam, 10) || 1;
                 const offset = (page - 1) * limit;
 
-                const res = await challengeAPI.list({ language, difficulty, limit, offset });
+                const res = await challengeAPI.list({ language, difficulty, search, limit, offset });
 
                 if (res.status === 200) {
                     const data = res.data;
@@ -79,7 +81,20 @@ export const ChallengeListClient = () => {
             <ChallengeFilter />
 
             {/* Challenge Table */}
-            {challenges.length === 0 ? (
+            {isLoading ? (
+                <div className="bg-white border border-[#b1ada1] p-6 space-y-4">
+                    <div className="flex justify-between border-b border-[#b1ada1] pb-4">
+                        <Skeleton width="150px" height="24px" />
+                        <Skeleton width="100px" height="24px" />
+                        <Skeleton width="100px" height="24px" />
+                        <Skeleton width="60px" height="24px" />
+                        <Skeleton width="60px" height="24px" />
+                    </div>
+                    {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} height="60px" className="border-b border-[#b1ada1] last:border-0" />
+                    ))}
+                </div>
+            ) : challenges.length === 0 ? (
                 <div className="bg-white border border-[#b1ada1] text-center py-16">
                     <p className="text-slate-900 font-bold text-sm tracking-widest uppercase">No challenges found.</p>
                 </div>

@@ -4,7 +4,7 @@ import AppShell from "@/app/components/AppShell";
 import { useTranslation } from "@/app/lib/i18n";
 import { useStore } from "@/app/lib/store";
 import { userAPI } from "@/app/lib/api";
-import { XPHistoryItem, ChallengeStats, CertificateItem } from "@/app/lib/types";
+import { XPHistoryItem, ChallengeStats, CertificateItem, QuizHistoryItem } from "@/app/lib/types";
 import { Badge, Skeleton, ProgressBar } from "@/app/components/UI";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -32,6 +32,8 @@ export default function ProfilPage() {
     const [xpHistory, setXpHistory] = useState<XPHistoryItem[]>([]);
     const [stats, setStats] = useState<ChallengeStats | null>(null);
     const [certificates, setCertificates] = useState<CertificateItem[]>([]);
+    const [quizHistory, setQuizHistory] = useState<QuizHistoryItem[]>([]);
+    const [selectedResult, setSelectedResult] = useState<QuizHistoryItem | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -45,14 +47,16 @@ export default function ProfilPage() {
     async function loadData() {
         setLoading(true);
         try {
-            const [historyRes, statsRes, certsRes] = await Promise.all([
+            const [historyRes, statsRes, certsRes, quizHistRes] = await Promise.all([
                 userAPI.getXPHistory({ limit: 5 }),
                 userAPI.getChallengeStats(),
                 userAPI.getCertificates(),
+                userAPI.getQuizHistory(),
             ]);
             setXpHistory(historyRes.data.data || []);
-            setStats(statsRes.data);
+            setStats(statsRes.data.data);
             setCertificates(certsRes.data.data || []);
+            setQuizHistory(quizHistRes.data.data || []);
         } catch { }
         setLoading(false);
     }
@@ -193,6 +197,64 @@ export default function ProfilPage() {
                     )}
                 </div>
 
+                {/* Quiz History */}
+                <div className="space-y-4">
+                    <h2 className="text-xs font-bold text-[#b1ada1] uppercase tracking-widest pl-2">
+                        {t("profile.quizHistory") || "Riwayat Kuis & Ujian"}
+                    </h2>
+                    {loading ? (
+                        <div className="space-y-0 border border-[#b1ada1] bg-white">
+                            {[1, 2, 3].map((i) => (
+                                <Skeleton key={i} height="64px" className="border-b border-[#b1ada1] last:border-0" />
+                            ))}
+                        </div>
+                    ) : quizHistory.length === 0 ? (
+                        <div className="bg-white border border-[#b1ada1] text-center py-10">
+                            <p className="text-[#b1ada1] font-bold text-sm uppercase tracking-widest">Belum ada riwayat kuis atau ujian.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-0 border border-[#b1ada1] bg-white">
+                            {quizHistory.map((item, index) => {
+                                const isLast = index === quizHistory.length - 1;
+                                return (
+                                    <div
+                                        key={index}
+                                        onClick={() => item.result_details && setSelectedResult(item)}
+                                        className={`flex items-center justify-between p-5 transition-colors hover:bg-[#f4f3ee] ${item.result_details ? 'cursor-pointer' : ''} ${!isLast ? 'border-b border-[#b1ada1]' : ''}`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 border border-[#b1ada1] bg-white text-[#b1ada1]">
+                                                {item.type === "course_exam" ? (
+                                                    <span className="material-symbols-outlined max-h-6 text-[#c15f3c]">school</span>
+                                                ) : (
+                                                    <span className="material-symbols-outlined max-h-6">quiz</span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <div className="text-[15px] font-bold text-slate-900 capitalize leading-none uppercase tracking-tight">
+                                                    {item.course_title} {item.lesson_title ? `- ${item.lesson_title}` : " (Ujian Akhir)"}
+                                                </div>
+                                                <div className="text-xs text-[#b1ada1] flex items-center gap-1.5 mt-1.5 font-bold uppercase tracking-widest">
+                                                    <span className="material-symbols-outlined text-[14px]">schedule</span>
+                                                    {new Date(item.passed_at).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-1 text-slate-900 font-bold text-base bg-[#f4f3ee] px-3 py-1.5 border border-[#c15f3c]">
+                                                Skor: {item.score} / {item.total_questions}
+                                            </div>
+                                            {item.result_details && (
+                                                <span className="material-symbols-outlined text-[#b1ada1]">chevron_right</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
                 {/* XP History */}
                 <div className="space-y-4">
                     <h2 className="text-xs font-bold text-[#b1ada1] uppercase tracking-widest pl-2">
@@ -311,6 +373,63 @@ export default function ProfilPage() {
                     </div>
                 ))}
             </div>
+
+            {/* Quiz Result Modal */}
+            {selectedResult && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#f4f3ee]/80 backdrop-blur-sm p-4 text-left">
+                    <div className="bg-white border border-[#b1ada1] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+                        <div className="p-6 border-b border-[#b1ada1] flex justify-between items-center bg-[#f4f3ee]">
+                            <div>
+                                <h3 className="text-sm font-bold text-[#c15f3c] uppercase tracking-widest mb-1">Result Detail</h3>
+                                <h2 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+                                    {selectedResult.course_title} {selectedResult.lesson_title ? `- ${selectedResult.lesson_title}` : " (Ujian Akhir)"}
+                                </h2>
+                            </div>
+                            <button
+                                onClick={() => setSelectedResult(null)}
+                                className="w-10 h-10 flex items-center justify-center border border-[#b1ada1] text-[#b1ada1] hover:text-[#c15f3c] hover:border-[#c15f3c] transition-all"
+                            >
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            {selectedResult.result_details?.map((detail, idx) => (
+                                <div key={detail.quiz_id} className="border border-[#b1ada1] p-5 bg-[#fcfbf7]">
+                                    <div className="flex items-start gap-4">
+                                        <div className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 ${detail.correct ? 'border-green-500 text-green-500 bg-green-50' : 'border-[#c15f3c] text-[#c15f3c] bg-red-50'
+                                            }`}>
+                                            <span className="material-symbols-outlined text-[20px]">
+                                                {detail.correct ? 'check_circle' : 'cancel'}
+                                            </span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-xs font-bold text-[#b1ada1] uppercase tracking-widest mb-2">Pertanyaan {idx + 1}</div>
+                                            <p className="font-bold text-slate-900 mb-4">{detail.question || `Pertanyaan #${idx + 1}`}</p>
+                                            {detail.explanation && (
+                                                <div className="bg-[#f4f3ee] p-4 border-l-2 border-[#c15f3c]">
+                                                    <div className="text-[10px] font-bold text-[#c15f3c] uppercase mb-1 tracking-widest">Penjelasan</div>
+                                                    <p className="text-sm text-slate-800 italic leading-relaxed">{detail.explanation}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-6 border-t border-[#b1ada1] bg-[#f4f3ee] flex justify-between items-center">
+                            <div className="text-sm font-bold text-slate-900 uppercase tracking-widest">
+                                Skor: {selectedResult.score} / {selectedResult.total_questions}
+                            </div>
+                            <button
+                                onClick={() => setSelectedResult(null)}
+                                className="bg-[#c15f3c] text-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest hover:bg-[#a64e2f] transition-all border border-[#c15f3c]"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AppShell>
     );
 }

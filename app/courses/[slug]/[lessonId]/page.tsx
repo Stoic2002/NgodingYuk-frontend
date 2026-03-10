@@ -39,7 +39,7 @@ export default function LessonPage() {
         setError(null);
         try {
             const res = await courseAPI.getLessonDetail(slug, lessonId);
-            setLesson(res.data);
+            setLesson(res.data.data);
         } catch (err: unknown) {
             const axiosErr = err as { response?: { status?: number } };
             if (axiosErr?.response?.status === 403) {

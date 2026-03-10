@@ -98,6 +98,13 @@ export interface CourseDetail {
     thumbnail_url?: string;
     is_enrolled: boolean;
     has_certificate: boolean;
+    modules: ModuleItem[];
+}
+
+export interface ModuleItem {
+    id: string;
+    title: string;
+    order_index: number;
     lessons: LessonListItem[];
 }
 
@@ -197,7 +204,6 @@ export interface ExamSubmitResponse {
     }[];
 }
 
-// ============ Certificates ============
 export interface CertificateItem {
     id: string;
     course_id: string;
@@ -205,5 +211,24 @@ export interface CertificateItem {
     course_slug: string;
     score: number;
     total_questions: number;
+    passed_at: string;
+}
+
+export interface QuizResultItem {
+    quiz_id: string;
+    question?: string;
+    correct: boolean;
+    correct_index: number;
+    explanation?: string;
+}
+
+// ============ Quiz History ============
+export interface QuizHistoryItem {
+    type: "lesson_quiz" | "course_exam";
+    course_title: string;
+    lesson_title?: string;
+    score: number;
+    total_questions: number;
+    result_details?: QuizResultItem[];
     passed_at: string;
 }

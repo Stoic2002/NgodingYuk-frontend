@@ -1,19 +1,53 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "@/app/lib/i18n";
+import { challengeAPI } from "@/app/lib/api";
 import { ChallengeListItem } from "@/app/lib/types";
 import { ChallengeFilter } from "@/app/components/UI/ChallengeFilter";
 import { ChallengePagination } from "@/app/components/UI/ChallengePagination";
 
-interface ChallengeListClientProps {
-    challenges: ChallengeListItem[];
-    totalPages: number;
-}
-
-export const ChallengeListClient = ({ challenges, totalPages }: ChallengeListClientProps) => {
+export const ChallengeListClient = () => {
     const { t } = useTranslation();
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const [challenges, setChallenges] = useState<ChallengeListItem[]>([]);
+    const [totalPages, setTotalPages] = useState<number>(1);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        const fetchChallenges = async () => {
+            setIsLoading(true);
+            try {
+                const language = searchParams.get("language") || "";
+                const difficulty = searchParams.get("difficulty") || "";
+                const pageParam = searchParams.get("page") || "1";
+                const limit = 10;
+                const page = parseInt(pageParam, 10) || 1;
+                const offset = (page - 1) * limit;
+
+                const res = await challengeAPI.list({ language, difficulty, limit, offset });
+
+                if (res.status === 200) {
+                    const data = res.data;
+                    setChallenges(data.data || []);
+                    if (data.meta && data.meta.total_pages) {
+                        setTotalPages(data.meta.total_pages);
+                    } else {
+                        setTotalPages((data.data || []).length === limit ? page + 1 : page);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to fetch challenges:", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchChallenges();
+    }, [searchParams]);
 
     return (
         <div className="mx-auto max-w-6xl w-full">

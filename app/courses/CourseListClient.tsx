@@ -1,16 +1,40 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslation } from "@/app/lib/i18n";
+import { courseAPI } from "@/app/lib/api";
 import { CourseListItem } from "@/app/lib/types";
 import { CourseCard } from "@/app/components/UI/CourseCard";
 import { CourseFilter } from "@/app/components/UI/CourseFilter";
 
-interface CourseListClientProps {
-    courses: CourseListItem[];
-}
-
-export const CourseListClient = ({ courses }: CourseListClientProps) => {
+export const CourseListClient = () => {
     const { t } = useTranslation();
+    const searchParams = useSearchParams();
+
+    const [courses, setCourses] = useState<CourseListItem[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            setIsLoading(true);
+            try {
+                const language = searchParams.get("language") || undefined;
+                const level = searchParams.get("level") || undefined;
+
+                const res = await courseAPI.list({ language, level });
+                if (res.status === 200) {
+                    setCourses(res.data.data || []);
+                }
+            } catch (e) {
+                console.error("Failed to fetch courses:", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, [searchParams]);
 
     return (
         <div className="space-y-6">
